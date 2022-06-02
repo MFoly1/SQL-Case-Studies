@@ -226,6 +226,48 @@ group by s.customer_id;
 
 
 
+--Bonus Questions--
+--Question 1
+--The following questions are related creating basic data tables that Danny and his team can use to quickly
+--derive insights without needing to join the underlying tables using SQL.
+SELECT
+    s.customer_id,
+    s.order_date,
+	menu.product_name,
+	menu.price,
+    CASE
+        WHEN s.order_date >= m.join_date THEN 'Y' ELSE 'N'
+    END member
+FROM sales s left join members m on s.customer_id = m.customer_id
+join menu on s.product_id = menu.product_id
+
+
+
+
+--Question 2
+--Danny also requires further information about the ranking of customer products, but he purposely does not need
+--the ranking for non-member purchases so he expects null ranking values for the records when customers are not yet part of the loyalty program.
+WITH all_tables AS(
+	SELECT
+		s.customer_id,
+		s.order_date,
+		menu.product_name,
+		menu.price,
+		CASE
+			WHEN s.order_date >= m.join_date THEN 'Y' ELSE 'N'
+		END member
+	FROM sales s left join members m on s.customer_id = m.customer_id
+	join menu on s.product_id = menu.product_id
+)
+SELECT
+	*,
+	CASE
+		WHEN member = 'Y' THEN DENSE_RANK() OVER(partition by customer_id, member order by order_date) 
+	END ranking
+FROM all_tables
+
+
+
 --############################################
 SELECT * FROM sales;
 SELECT * FROM menu;
